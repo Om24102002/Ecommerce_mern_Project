@@ -110,34 +110,34 @@ exports.UpdateProduct = catchAsynError(async (req, res, next) => {
         return next(new ErrorHander("Product not found", 404))
     }
 
-    let image = [];
-    if (typeof req.body.image === "string") {
-        image.push(req.body.image)
+    let images = [];
+    if (typeof req.body.images === "string") {
+        images.push(req.body.images)
     }
     else {
-        image = image.req.body.image;
+        images = req.body.images;
     }
 
 
-    if (image !== undefined) {
+    if (images !== undefined) {
         // Deleting Images from Cloudinary
-        for (let i = 0; i < product.image.length; i++) {
-            await cloudinary.v2.uploader.destroy(product.image[i].public_id);
+        for (let i = 0; i < product.images.length; i++) {
+            await cloudinary.v2.uploader.destroy(product.images[i].public_id);
         }
 
-        const imageLink = [];
-        for (let i = 0; i < image.length; i++) {
-            const result = await cloudinary.v2.uploader.upload(image[i], {
+        const imagesLink = [];
+        for (let i = 0; i < images.length; i++) {
+            const result = await cloudinary.v2.uploader.upload(images[i], {
                 folder: "products",
             });
 
-            imageLink.push({
+            imagesLink.push({
                 public_id: result.public_id,
                 url: result.secure_url,
 
             })
         }
-        req.body.image = imageLink; 
+        req.body.images = imagesLink; 
     }
     product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, useFindAndModify: false });
 
@@ -158,8 +158,8 @@ exports.deleteProduct = catchAsynError(async (req, res, next) => {
     }
 
     // Deleting Images from Cloudinary
-    for (let i = 0; i < product.image.length; i++) {
-        await cloudinary.v2.uploader.destroy(product.image[i].public_id);
+    for (let i = 0; i < product.images.length; i++) {
+        await cloudinary.v2.uploader.destroy(product.images[i].public_id);
     }
 
     await product.deleteOne();
